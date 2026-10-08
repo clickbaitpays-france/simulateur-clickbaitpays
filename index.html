@@ -115,5 +115,149 @@ function closeLevel(){
 }
 document.addEventListener('keydown',e=>{if(e.key==='Escape') closeLevel();});
 </script>
+<!-- SIMULATEUR DE BUDGET -->
+<section style="max-width:900px;margin:40px auto;padding:25px;border-radius:20px;background:#ffffff15;border:1px solid #ffffff30;text-align:center;">
 
+  <h2>💰 Quelle campagne puis-je acheter ?</h2>
+
+  <p>
+    Entrez votre budget. Le simulateur recherche automatiquement
+    une combinaison de 3 campagnes maximum.
+  </p>
+
+  <div style="margin:25px 0;">
+    <label for="budgetCBP"><strong>Votre budget en $ :</strong></label><br><br>
+
+    <input
+      type="number"
+      id="budgetCBP"
+      min="0"
+      step="1"
+      placeholder="Exemple : 500"
+      style="padding:14px;font-size:20px;width:220px;border-radius:10px;border:1px solid #ccc;text-align:center;"
+    >
+
+    <br><br>
+
+    <button
+      type="button"
+      onclick="calculerCampagnesCBP()"
+      style="padding:15px 28px;border:0;border-radius:12px;background:#0066ff;color:white;font-size:18px;font-weight:bold;cursor:pointer;"
+    >
+      CALCULER
+    </button>
+  </div>
+
+  <div id="resultatCBP"
+       style="margin-top:25px;font-size:18px;line-height:1.7;">
+  </div>
+
+</section>
+
+<script>
+function calculerCampagnesCBP() {
+
+  const budget = Number(document.getElementById("budgetCBP").value);
+
+  const campagnes = [
+    {niveau:"N7", prix:2640},
+    {niveau:"N6", prix:1320},
+    {niveau:"N5", prix:660},
+    {niveau:"N4", prix:330},
+    {niveau:"N3", prix:165},
+    {niveau:"N2", prix:84},
+    {niveau:"N1", prix:14}
+  ];
+
+  const resultat = document.getElementById("resultatCBP");
+
+  if (!Number.isFinite(budget) || budget < 14) {
+    resultat.innerHTML =
+      "⚠️ Entrez un budget d'au moins <strong>14 $</strong>.";
+    return;
+  }
+
+  let meilleure = null;
+
+  /* 1 campagne */
+  for (let a = 0; a < campagnes.length; a++) {
+
+    let total = campagnes[a].prix;
+
+    if (total <= budget &&
+        (!meilleure || total > meilleure.total)) {
+
+      meilleure = {
+        liste:[campagnes[a]],
+        total:total
+      };
+    }
+  }
+
+  /* 2 campagnes */
+  for (let a = 0; a < campagnes.length; a++) {
+    for (let b = a; b < campagnes.length; b++) {
+
+      let total =
+        campagnes[a].prix +
+        campagnes[b].prix;
+
+      if (total <= budget &&
+          (!meilleure || total > meilleure.total)) {
+
+        meilleure = {
+          liste:[campagnes[a], campagnes[b]],
+          total:total
+        };
+      }
+    }
+  }
+
+  /* 3 campagnes */
+  for (let a = 0; a < campagnes.length; a++) {
+    for (let b = a; b < campagnes.length; b++) {
+      for (let c = b; c < campagnes.length; c++) {
+
+        let total =
+          campagnes[a].prix +
+          campagnes[b].prix +
+          campagnes[c].prix;
+
+        if (total <= budget &&
+            (!meilleure || total > meilleure.total)) {
+
+          meilleure = {
+            liste:[
+              campagnes[a],
+              campagnes[b],
+              campagnes[c]
+            ],
+            total:total
+          };
+        }
+      }
+    }
+  }
+
+  if (!meilleure) {
+    resultat.innerHTML = "Aucune campagne disponible avec ce budget.";
+    return;
+  }
+
+  const reste = budget - meilleure.total;
+
+  const noms = meilleure.liste
+    .map(c => "<strong>" + c.niveau + "</strong>")
+    .join(" + ");
+
+  resultat.innerHTML =
+    "✅ <strong>Campagne(s) possible(s)</strong><br><br>" +
+    noms +
+    "<br><br>" +
+    "💵 Budget : <strong>" + budget.toFixed(2) + " $</strong><br>" +
+    "🛒 Total utilisé : <strong>" + meilleure.total.toFixed(2) + " $</strong><br>" +
+    "💰 Reste : <strong>" + reste.toFixed(2) + " $</strong><br><br>" +
+    "<small>Simulation informative — vérifiez les tarifs et conditions actuels de la plateforme avant tout achat.</small>";
+}
+</script>
 </body></html>
